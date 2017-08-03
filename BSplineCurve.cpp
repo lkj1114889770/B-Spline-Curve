@@ -25,34 +25,37 @@ int main(int argc, char *argv[])
 		0.7, 0.0, 0.0,
 		0.8, -0.2, 0.0,
 		0.3, -0.4, 0.0,
-		0.4, -0.6, 0.0; 
-	
-	int C[10];
-	C[9] = 1, C[8] = 5;
-	for (int i = 7; i >=0; i--){
-		C[i] = 4 * C[i + 1] - C[i + 2];
-	}
-	double tmp[3];
-	for (int i = 0; i < 3; i++){
-		int k = 1;
-		tmp[i] = 0.0;
-		for (int j = 8; j >= 0; j--){
-			tmp[i] += (C[j + 1] * P(j,i) * k);
-			k = k*(-1);
+		0.4, -0.5, 0.0; 
+	MatrixXd A(12, 12);
+	A = MatrixXd::Zero(12, 12);
+	cout << A << endl;
+	for (int i = 0; i < 12; i++){
+		if (i == 0){
+			A(0, 0) = -1;
+			A(0, 1) = 1;
 		}
-		tmp[i] = 6.0*tmp[i] / (C[1] + C[0]);
-	}
-
-	B(0, 0) = tmp[0], B(0, 1) = tmp[1], B(0, 2) = tmp[2];
-	B(1, 0) = tmp[0], B(1, 1) = tmp[1], B(1, 2) = tmp[2];
-	for (int i = 2; i < 10; i++){
-		for (int j = 0; j < 3; j++){
-			B(i, j) = 6 * P(i - 2, j) - 4 * B(i - 1, j) - B(i - 2, j);
+		else if (i == 11){
+			A(11, 10) = 1;
+			A(11, 11) = -1;
+		}
+		else{
+			A(i, i - 1) = 1;
+			A(i, i) = 4;
+			A(i, i + 1) = 1;
 		}
 	}
-	B(10, 0) = (6 * P(9, 0) - B(9, 0)) / 5;
-	B(10, 1) = (6 * P(9, 1) - B(9, 1)) / 5;
-	B(11, 0) = B(10, 0), B(11, 1) = B(10, 1), B(11, 2) = B(10, 2);
+	cout << A << endl;
+	MatrixXd PP(12, 3);
+	PP = MatrixXd::Zero(12, 3);
+	for (int i = 1; i < 11; i++){
+		for (int j = 0; j < 2; j++){
+			PP(i, j) = 6*P(i - 1, j);
+		}
+	}
+	cout << PP << endl;
+	B = A.inverse()*PP;
+	cout << "控制点" << endl;
+	cout << B << endl;
 
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_RGB | GLUT_SINGLE);
@@ -141,7 +144,7 @@ void Display(void)//OpenGL来绘制曲线
 	glEnd();
 	glPointSize(10);
 	glBegin(GL_POINTS);
-	for (int i = 0; i<9; i++){
+	for (int i = 0; i<10; i++){
 		glVertex2f(P(i, 0), P(i, 1));
 	}
 	glEnd();
